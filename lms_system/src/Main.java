@@ -1,9 +1,4 @@
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import com.menu.mainMenu;
+import com.menu.MainMenu;
 
 import java.sql.*;
 import java.util.Scanner;
@@ -22,8 +17,9 @@ public class Main {
     public static void main(String[] args) {
         //launch(args);
         Scanner input = new Scanner(System.in);
-        new mainMenu(input);
-        /*System.setProperty("java.net.preferIPv6Addresses", "true");
+        Connection con;
+
+        System.setProperty("java.net.preferIPv6Addresses", "true");
 
         String url = "jdbc:jtds:sqlserver://DESKTOP-LQBADC6/lmsSystem;instance=SQLEXPRESS;user=sa;password=12345678";
 
@@ -35,15 +31,9 @@ public class Main {
 
             Class.forName(driverName);
 
-            Connection con = DriverManager.getConnection(url);
+            con = DriverManager.getConnection(url);
             System.out.println("Successfully Connected to the database!");
-
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM Student");
-            while (rs.next()) {
-                int Roll_Number = rs.getInt("Roll_Number");
-                System.out.println(Roll_Number);
-            }
+            new MainMenu(input, con);
 
         }catch (ClassNotFoundException e) {
 
@@ -52,7 +42,7 @@ public class Main {
         } catch (SQLException e) {
 
             System.out.println("Could not connect to the database " + e.getMessage());
-        }*/
+        }
 
         //Statement stmt = con.createStatement();
         //ResultSet rs = stmt.executeQuery("SELECT * FROM Student");

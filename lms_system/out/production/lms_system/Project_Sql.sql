@@ -6,8 +6,8 @@ Create Table Teacher (
     Teacher_ID int Primary Key,
 	Teacher_Name varchar(25),
 	Teacher_Age int,
-	Teacher_Email varchar(30) Unique,
-	Teacher_Gender char Check (Teacher_Gender = 'M' OR Teacher_Gender = 'F')
+	Teacher_username varchar(30) Unique,
+	Teacher_Password varchar(30),
 );
 
 Create Table Course (
@@ -27,18 +27,20 @@ Create Table Section (
 );
 
 Create Table Student (
-    Student_ID int Primary Key,
+	Student_username varchar(30) Unique,
+	Student_Password varchar(30),
 	Student_Name varchar(25),
-	Student_Gender char Check (Student_Gender = 'M' OR Student_Gender = 'F'),
-	Student_Email varchar(30) Unique,
-	Program int Foreign Key References Programs(Program_ID),
+	Student_RollNo varchar(10) Primary Key,
+	Student_Batch int,
 	SGPA int Default 0 Not Null,
 	CGPA int Default 0 Not Null
 );
 
 Create Table Academic_Officer (
-     Officer_ID int Primary Key,
-	 Officer_Name varchar(25)
+    Officer_ID int Primary Key,
+	Officer_Name varchar(25),
+	Officer_username varchar(30) Unique,
+	Officer_Password varchar(30)
 );
 
 Create Table Users (
@@ -77,14 +79,3 @@ Create Table Evaluation_criteria (
 	  No_Of_Evaluations int,
 	  Weightage int,
 );
-
-create table User_Types(
-	[Type_ID] int Primary Key,
-	[Type_Name] varchar(30)
-)
-
-create table User_Credentials(
-	Email varchar(30) Foreign Key References Student(Student_Email) ,
-	[password] varchar (30),
-	[Type_ID] int Foreign Key References User_Types([Type_ID])
-)
