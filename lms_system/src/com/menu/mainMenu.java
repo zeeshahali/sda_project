@@ -3,6 +3,8 @@ package com.menu;
 import com.Utility.InputReader;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class MainMenu extends Menu {
@@ -47,5 +49,6 @@ public class MainMenu extends Menu {
         StudentMenu menu = new StudentMenu(con);
         menu.ShowMenu();
     }
+
 
 }

@@ -1,5 +1,12 @@
 package com.lms;
 
+import java.awt.geom.Arc2D;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
 public class Evaluation {
     String Name;
     String Type_of_Evaluation;
@@ -50,5 +57,47 @@ public class Evaluation {
 
     public void setWeight(int weight) {
         Weight = weight;
+    }
+
+    public static ArrayList<Evaluation> AllEvaluations(Connection connection){
+        ArrayList<Evaluation> evaluations = new ArrayList<>();
+        try{
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * From Evaluations");
+            while(resultSet.next()){
+                String name = resultSet.getString("Evaluation_Name");
+                String type = resultSet.getString("Evaluation_Type");
+                int weight = resultSet.getInt("Weightage");
+                float marksObt = resultSet.getInt("Marks_Obtained");
+                int total = resultSet.getInt("Total_Marks");
+                Evaluation evaluation = new Evaluation(name, type, weight, total);
+                evaluation.setMarks_Obtained(marksObt);
+                evaluations.add(evaluation);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return evaluations;
+    }
+
+    public static ArrayList<Evaluation> SectionEvaluations(Connection connection, Section section){
+        ArrayList<Evaluation> evaluations = new ArrayList<Evaluation>();
+        try{
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * From Evaluations WHERE Registered_Section_Code = '"+section.getCode()+"'");
+            while(resultSet.next()){
+                String name = resultSet.getString("Evaluation_Name");
+                String type = resultSet.getString("Evaluation_Type");
+                int weight = resultSet.getInt("Weightage");
+                float marksObt = resultSet.getInt("Marks_Obtained");
+                int total = resultSet.getInt("Total_Marks");
+                Evaluation evaluation = new Evaluation(name, type, weight, total);
+                evaluation.setMarks_Obtained(marksObt);
+                evaluations.add(evaluation);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return evaluations;
     }
 }

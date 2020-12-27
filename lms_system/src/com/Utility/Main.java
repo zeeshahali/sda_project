@@ -1,4 +1,7 @@
-import com.lms.Course;
+package com.Utility;
+
+import com.lms.Attendance;
+import com.lms.Section;
 import com.menu.MainMenu;
 
 import java.sql.*;
@@ -6,6 +9,8 @@ import java.util.Scanner;
 
 public class Main {
 
+    public static String url = "jdbc:jtds:sqlserver://DESKTOP-LQBADC6/lmsSystem;instance=SQLEXPRESS;user=sa;password=12345678";
+    static Connection connection;
     /*@Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("Login.fxml"));
@@ -14,15 +19,15 @@ public class Main {
         primaryStage.show();
     }*/
 
+    public static Connection GetConnection(){
+        return connection;
+    }
 
     public static void main(String[] args) {
         //launch(args);
         Scanner input = new Scanner(System.in);
-        Connection con;
 
         System.setProperty("java.net.preferIPv6Addresses", "true");
-
-        String url = "jdbc:jtds:sqlserver://DESKTOP-LQBADC6/lmsSystem;instance=SQLEXPRESS;user=sa;password=12345678";
 
         //System.out.println(java.lang.System.getProperty("java.library.path"));
 
@@ -32,9 +37,9 @@ public class Main {
 
             Class.forName(driverName);
 
-            con = DriverManager.getConnection(url);
+            connection = DriverManager.getConnection(url);
             System.out.println("Successfully Connected to the database!");
-            MainMenu mainMenu = new MainMenu(con);
+            MainMenu mainMenu = new MainMenu(connection);
             mainMenu.ShowMenu();
 
         }catch (ClassNotFoundException e) {

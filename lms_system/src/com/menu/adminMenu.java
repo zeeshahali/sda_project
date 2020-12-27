@@ -1,8 +1,11 @@
 package com.menu;
 
 import com.Utility.InputReader;
+import com.Utility.Utils;
 import com.lms.Admin;
 import com.lms.Course;
+import com.lms.Section;
+import com.lms.Teacher;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -28,6 +31,7 @@ public class AdminMenu extends Menu {
 
         boolean result = Authenticate();
         if (result) {
+            Utils.PrintDivider();
             GetAdminData();
             System.out.println("Welcome " + admin.getName());
             String menu = "1. Add Course.\n2. Add Section.\n3. Open Registration.\n" +
@@ -86,6 +90,7 @@ public class AdminMenu extends Menu {
         adminPassword = InputReader.getInstance().GetString();
     }
 
+    @Override
     boolean Authenticate(){
         try {
             String uname = "";
@@ -110,12 +115,26 @@ public class AdminMenu extends Menu {
     void AddCourseToDB(Course c){
         try {
             Statement statement = con.createStatement();
-            ResultSet resultSet = statement.executeQuery("INSERT into Course values ('" + c.getCode() +
+            statement.executeUpdate("INSERT into Course values ('" + c.getCode() +
                     "', '"+c.getName()+"', '"+c.getOfferedInSemester()+"', '"+c.getPreReq()+"', '"+c.getCreditHours()+"')");
 
         }catch (SQLException e) {
 
             System.out.println("Course already exists " + e.getMessage());
+        }
+    }
+
+    void AddSectionToDB(Section s){
+        try {
+            Statement statement = con.createStatement();
+            statement.executeUpdate("INSERT into Section values ('" + s.getCode()+
+                    "', '"+s.getName()+"', '"+s.getTotal_Number_Of_Seats()+"', '"+s.getNumber_Of_Seats_Available()+
+                    "', '"+s.getTeacher().getUsername()+
+                    "', '"+s.getCourse().getCode()+"')");
+
+        }catch (SQLException e) {
+
+            System.out.println("Section already exists " + e.getMessage());
         }
     }
 
@@ -128,24 +147,25 @@ public class AdminMenu extends Menu {
         String PreReq = InputReader.getInstance().GetString();
         System.out.println("Enter Course Credit Hours : ");
         int CH = InputReader.getInstance().GetInt();
-
-        //We have to add below course in our DB
         Course c = new Course(Code,Name,offeredInSemester, PreReq,CH);
-
         AddCourseToDB(c);
-
     }
 
     void AddSection(){
         ArrayList<Course> courses = Course.ShowAllCourses(con);
         PrintAvailableCourses(courses);
-        int choice = InputReader.getInstance().GetInt("Enter your choice");
-        String Name = InputReader.getInstance().GetString("Enter Section Name : ");
-        String Code = InputReader.getInstance().GetString("Enter Section Code : ");
-        int Number_of_Seats = InputReader.getInstance().GetInt("Enter Total Number of Seats : ");
-
-        //Give option for selecting course for this section
-        //Give option for selecting teachers who teach this course
+        int course = InputReader.getInstance().GetInt("Enter your choice");
+        String name = InputReader.getInstance().GetString("Enter Section Name : ");
+        String code = InputReader.getInstance().GetString("Enter Section Code : ");
+        int number_of_Seats = InputReader.getInstance().GetInt("Enter Total Number of Seats : ");
+        ArrayList<Teacher> teachers = Teacher.AllTeachers(con);
+        System.out.println("Choose from the teachers bellow: ");
+        for (int i = 0; i < teachers.size(); i++) System.out.println(i+1+"- "+teachers.get(i).getName());
+        int teacher = InputReader.getInstance().GetInt("Enter your choice");
+        Section section = new Section(code, name, number_of_Seats, courses.get(course), teachers.get(teacher));
+        teachers.get(teacher).add_Section(section);
+        courses.get(course).add_section(section);
+        AddSectionToDB(section);
     }
 
     private void PrintAvailableCourses(ArrayList<Course> courses) {
@@ -158,7 +178,7 @@ public class AdminMenu extends Menu {
     void openRegistration(){
         System.out.println("Enter the Semester: ");
         int semester = InputReader.getInstance().GetInt();
-        System.out.println("Which section");
+        int section = InputReader.getInstance().GetInt("Enter the Section you want to open registration for: ");
     }
 
     void closeRegistration(){

@@ -1,6 +1,7 @@
 package com.menu;
 
 import com.Utility.InputReader;
+import com.Utility.Utils;
 import com.lms.Evaluation;
 import com.lms.Teacher;
 
@@ -22,6 +23,22 @@ public class TeacherMenu extends Menu {
         teacherPassword = null;
     }
 
+    Teacher GetTeacherData(Connection connection){
+        try{
+            Statement statement = connection.createStatement();
+            String sql = "SELECT * FROM Teacher WHERE Teacher_username = '"+teacherUsername+"'";
+            ResultSet resultSet = statement.executeQuery(sql);
+            while(resultSet.next()){
+                String name = resultSet.getString("Teacher_Name");
+                teacher = new Teacher(teacherUsername, teacherPassword, name);
+                //teacher.setSections();
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return teacher;
+    }
+
     public void ShowMenu() {
         if(CanTakeInput()) {
             TakeInput();
@@ -29,7 +46,8 @@ public class TeacherMenu extends Menu {
 
         boolean result = Authenticate();
         if (result) {
-            //teacher = GetTeacherData();
+            Utils.PrintDivider();
+            teacher = GetTeacherData(con);
             String menu = "1. Set Evaluations.\n2. Record Attendance.\n3. Display marks sheet.\n" +
                     "4. Enter marks.\n5. Enter Grades.\n0. To go back a menu.\nEnter your choice: ";
             System.out.println(menu);
@@ -72,6 +90,7 @@ public class TeacherMenu extends Menu {
         }
     }
 
+    @Override
     boolean Authenticate() {
         try {
             String uname = "";
@@ -80,8 +99,8 @@ public class TeacherMenu extends Menu {
             ResultSet rs = stmt.executeQuery("SELECT * FROM Teacher WHERE Teacher_username = '"
                     + teacherUsername + "'");
             while (rs.next()) {
-                uname = rs.getString("Officer_username");
-                pass = rs.getString("Officer_Password");
+                uname = rs.getString("Teacher_username");
+                pass = rs.getString("Teacher_Password");
             }
             if (uname.equals(teacherUsername) && pass.equals(teacherPassword)) {
                 return true;
@@ -124,7 +143,7 @@ public class TeacherMenu extends Menu {
         date = InputReader.getInstance().GetString("Enter Date: ");
         int inp = 0;
         for (int i = 0; i < teacher.getSections().size() && inp == 0; i++) {
-            String sectionSelectionTxt = teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
+            String sectionSelectionTxt = teacher.getSections().get(i).getCourse().getName() + "(" + teacher.getSections().get(i).getName() +
                     ")\nIf you want to select this section enter 1 else enter 0";
             inp = InputReader.getInstance().GetInt(sectionSelectionTxt);
             if (inp == 1) {

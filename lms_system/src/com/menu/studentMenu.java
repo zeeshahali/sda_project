@@ -1,9 +1,11 @@
 package com.menu;
 
 import com.Utility.InputReader;
+import com.Utility.Utils;
 import com.lms.Course;
 import com.lms.Registered;
 import com.lms.Student;
+import jdk.jshell.execution.Util;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -23,13 +25,19 @@ public class StudentMenu extends Menu {
         StudentPassword = null;
     }
 
+    Student StudentData(Connection connection){
+
+        return student;
+    }
+
     public void ShowMenu(){
         if(CanTakeInput()) {
             TakeInput();
         }
-
         boolean result = Authenticate();
         if (result) {
+            Utils.PrintDivider();
+            student = StudentData(con);
             String menu = "1. Register to a course.\n2. Drop a course.\n3. Subscribe to a section.\n" +
                     "4. View your attendance.\n5. View your transcript.\n0. To go back a menu.\nEnter your choice: ";
             System.out.println(menu);
@@ -73,15 +81,16 @@ public class StudentMenu extends Menu {
         }
     }
 
+    @Override
     boolean Authenticate(){
         try {
             String uname = "";
             String pass = "";
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM Academic_Officer WHERE Officer_username = '" + studentUsername + "'");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Student WHERE Student_username = '" + studentUsername + "'");
             while (rs.next()) {
-                uname = rs.getString("Officer_username");
-                pass = rs.getString("Officer_Password");
+                uname = rs.getString("Student_username");
+                pass = rs.getString("Student_Password");
             }
             if(uname.equals(studentUsername) && pass.equals(StudentPassword)){
                 return true;

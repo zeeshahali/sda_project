@@ -4,12 +4,14 @@ import java.util.ArrayList;
 
 public class Registered{
     Section section;
+    String withdrawalDate;
     float creditEarned;
     ArrayList<Attendance> attendance = new ArrayList<Attendance>();
     int batch;
     float calculated_Attendance;
 
-    public Registered(int batch, Section section, float CE){
+    public Registered(int batch, String withdrawalDate, Section section, float CE){
+        this.withdrawalDate = withdrawalDate;
         this.section = section;
         this.batch = batch;
         this.creditEarned = CE;
@@ -59,5 +61,7 @@ public class Registered{
     public void setBatch(int batch) {
         this.batch = batch;
     }
+
+
 
 }

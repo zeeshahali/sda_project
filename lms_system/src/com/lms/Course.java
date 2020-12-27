@@ -1,5 +1,7 @@
 package com.lms;
 
+import com.Utility.Utils;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +16,8 @@ public class Course {
     int creditHours;
     ArrayList<Section> course_section = new ArrayList<Section>();
 
+    Course(){}
+
     public Course(String code, String name, int offeredInSemester, String preReq, int CH) {
         this.code = code;
         this.name = name;
@@ -23,9 +27,10 @@ public class Course {
     }
 
     public void PrintCourse(){
-        System.out.println("Course code: "+this.code+ "| Course Name: "+this.name+
-                "| Semester: "+this.offeredInSemester+ "| PreReq: "+this.preReq+
-                "| CreditHours: "+this.creditHours);
+        System.out.println("Course code: "+this.code+ "\nCourse Name: "+this.name+
+                "\nSemester: "+this.offeredInSemester+ "\nPreReq: "+this.preReq+
+                "\nCreditHours: "+this.creditHours);
+        Utils.PrintDivider();
     }
 
     public void add_section(Section s) {
@@ -97,6 +102,7 @@ public class Course {
                 String preReq = resultSet.getString("Course_PreReq");
                 int credits = resultSet.getInt("Course_CH");
                 Course course = new Course(code, name, semester, preReq, credits);
+
                 courses.add(course);
             }
         }catch (SQLException e){
@@ -124,5 +130,26 @@ public class Course {
             System.out.println("No Course Exists " + e.getMessage());
         }
         return courses;
+    }
+
+    public static Course SectionCourse(Connection connection, String courseCode){
+        Course course = new Course();
+        try{
+            Statement statement = connection.createStatement();
+
+            ResultSet resultSet = statement.executeQuery("SELECT * from Course WHERE Course_Code = '"+courseCode+"'");
+            while (resultSet.next()){
+                String code = resultSet.getString("Course_code");
+                String name = resultSet.getString("Course_Name");
+                int semester = resultSet.getInt("Offered_in_Semester");
+                String preReq = resultSet.getString("Course_PreReq");
+                int credits = resultSet.getInt("Course_CH");
+                course = new Course(code, name, semester, preReq, credits);
+
+            }
+        }catch (SQLException e){
+            System.out.println("No Course Exists " + e.getMessage());
+        }
+        return course;
     }
 }
