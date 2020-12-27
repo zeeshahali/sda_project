@@ -6,9 +6,4 @@ public class Admin extends User{
         this.name = name;
         this.password = password;
     }
-
-    void printAdmin(){
-        String Admin_info = "Name : " + this.name + "\nUserName : " + this.username;
-        System.out.println(Admin_info);
-    }
 }

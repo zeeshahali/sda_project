@@ -1,43 +1,50 @@
 package com.menu;
 
+import com.Utility.InputReader;
+
 import java.sql.Connection;
 import java.util.Scanner;
 
 public class MainMenu extends Menu {
 
-    public MainMenu(Scanner _input, Connection _con) {
-        this.input = _input;
+    public MainMenu(Connection _con) {
         this.con = _con;
     }
-    void ShowMenu(){
+    public void ShowMenu(){
         System.out.println("***** Main Menu *****");
         String users = "1. Admin.\t 2.Teacher.\t 3.Student.\nEnter \"0\" to exit the program.\nEnter your choice: ";
         System.out.println("Choose your user type from the following:\n" + users);
-        int choice = input.nextInt();
+        int choice = InputReader.getInstance().GetInt();
         if (choice == 0)  System.out.println("***** You are exiting the program *****");
         else{
             //authentication function will be called here
-            if (choice == 1)    adminPanel(input, con);
-            else if (choice == 2)   teacherPanel(input, con);
-            else if (choice == 3)   studentPanel(input, con);
+            if (choice == 1)    adminPanel(con);
+            else if (choice == 2)   teacherPanel(con);
+            else if (choice == 3)   studentPanel(con);
         }
     }
 
-    public void adminPanel(Scanner input, Connection con){
+    @Override
+    boolean Authenticate() {        return false;    }
+
+    @Override
+    void HandleChoice(int choice) {    }
+
+    public void adminPanel(Connection con){
         System.out.println("***** Admin Panel *****");
-        AdminMenu menu = new AdminMenu(input, con);
+        AdminMenu menu = new AdminMenu(con);
         menu.ShowMenu();
     }
 
-    public void teacherPanel(Scanner input, Connection con){
+    public void teacherPanel(Connection con){
         System.out.println("***** Teacher's Panel *****");
-        TeacherMenu menu = new TeacherMenu(input, con);
+        TeacherMenu menu = new TeacherMenu(con);
         menu.ShowMenu();
     }
 
-    public void studentPanel(Scanner input, Connection con){
+    public void studentPanel(Connection con){
         System.out.println("***** Student Panel *****");
-        StudentMenu menu = new StudentMenu(input, con);
+        StudentMenu menu = new StudentMenu(con);
         menu.ShowMenu();
     }
 

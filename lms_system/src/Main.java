@@ -1,3 +1,4 @@
+import com.lms.Course;
 import com.menu.MainMenu;
 
 import java.sql.*;
@@ -33,7 +34,8 @@ public class Main {
 
             con = DriverManager.getConnection(url);
             System.out.println("Successfully Connected to the database!");
-            new MainMenu(input, con);
+            MainMenu mainMenu = new MainMenu(con);
+            mainMenu.ShowMenu();
 
         }catch (ClassNotFoundException e) {
 

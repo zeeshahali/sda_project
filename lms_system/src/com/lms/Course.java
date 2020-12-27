@@ -1,5 +1,9 @@
 package com.lms;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class Course {
@@ -16,6 +20,12 @@ public class Course {
         this.offeredInSemester = offeredInSemester;
         this.preReq = preReq;
         this.creditHours = CH;
+    }
+
+    public void PrintCourse(){
+        System.out.println("Course code: "+this.code+ "| Course Name: "+this.name+
+                "| Semester: "+this.offeredInSemester+ "| PreReq: "+this.preReq+
+                "| CreditHours: "+this.creditHours);
     }
 
     public void add_section(Section s) {
@@ -72,5 +82,47 @@ public class Course {
 
     public void setCreditHours(int creditHours) {
         this.creditHours = creditHours;
+    }
+
+    public static ArrayList<Course> ShowAllCourses(Connection con){
+        ArrayList<Course> courses = new ArrayList<Course>();
+        try{
+            Statement statement = con.createStatement();
+
+            ResultSet resultSet = statement.executeQuery("SELECT * from Course");
+            while (resultSet.next()){
+                String code = resultSet.getString("Course_code");
+                String name = resultSet.getString("Course_Name");
+                int semester = resultSet.getInt("Offered_in_Semester");
+                String preReq = resultSet.getString("Course_PreReq");
+                int credits = resultSet.getInt("Course_CH");
+                Course course = new Course(code, name, semester, preReq, credits);
+                courses.add(course);
+            }
+        }catch (SQLException e){
+            System.out.println("No Course Exists " + e.getMessage());
+        }
+        return courses;
+    }
+
+    public static ArrayList<Course> ShowCoursesInSem(Connection connection, int semseter){
+        ArrayList<Course> courses = new ArrayList<Course>();
+        try{
+            Statement statement = connection.createStatement();
+
+            ResultSet resultSet = statement.executeQuery("SELECT * from Course WHERE Offered_In_Semester = '"+semseter+"'");
+            while (resultSet.next()){
+                String code = resultSet.getString("Course_code");
+                String name = resultSet.getString("Course_Name");
+                int semester = resultSet.getInt("Offered_in_Semester");
+                String preReq = resultSet.getString("Course_PreReq");
+                int credits = resultSet.getInt("Course_CH");
+                Course course = new Course(code, name, semester, preReq, credits);
+                courses.add(course);
+            }
+        }catch (SQLException e){
+            System.out.println("No Course Exists " + e.getMessage());
+        }
+        return courses;
     }
 }

@@ -1,5 +1,6 @@
 package com.menu;
 
+import com.Utility.InputReader;
 import com.lms.Evaluation;
 import com.lms.Teacher;
 
@@ -12,29 +13,56 @@ import java.util.Scanner;
 
 public class TeacherMenu extends Menu {
     Teacher teacher;
+    private String teacherUsername;
+    private String teacherPassword;
 
-    public TeacherMenu(Scanner _input, Connection _con) {
-        input = _input;
+    public TeacherMenu(Connection _con) {
         con = _con;
+        teacherUsername = null;
+        teacherPassword = null;
     }
 
-    void ShowMenu() {
-        String menu = "1. Set Evaluations.\n2. Record Attendance.\n3. Display marks sheet.\n" +
-                "4. Enter marks.\n5. Enter Grades.\n0. To go back a menu.\nEnter your choice: ";
-        System.out.println(menu);
-        int choice = input.nextInt();
-        HandleChoice(choice);
+    public void ShowMenu() {
+        if(CanTakeInput()) {
+            TakeInput();
+        }
+
+        boolean result = Authenticate();
+        if (result) {
+            //teacher = GetTeacherData();
+            String menu = "1. Set Evaluations.\n2. Record Attendance.\n3. Display marks sheet.\n" +
+                    "4. Enter marks.\n5. Enter Grades.\n0. To go back a menu.\nEnter your choice: ";
+            System.out.println(menu);
+            int choice = InputReader.getInstance().GetInt();
+            HandleChoice(choice);
+        }
+        else{
+            System.out.println("username or password incorrect!");
+            teacherUsername = null;
+            ShowMenu();
+        }
     }
 
-    private void HandleChoice(int choice) {
+    private boolean CanTakeInput() {
+        return teacherUsername == null || teacherPassword == null;
+    }
+
+    private void TakeInput() {
+        System.out.println("Enter username: ");
+        teacherUsername = InputReader.getInstance().GetString();
+        System.out.println("Enter password: ");
+        teacherPassword = InputReader.getInstance().GetString();
+    }
+
+    void HandleChoice(int choice) {
         switch (choice) {
             case 0 -> {
-                MainMenu mainMenu = new MainMenu(input, con);
+                MainMenu mainMenu = new MainMenu(con);
                 mainMenu.ShowMenu();
             }
-            case 1 -> SetEvaluations(input);
-            case 2 -> RecordAttendance(input);
-            case 3 -> DisplayMarksSheet(input);
+            case 1 -> SetEvaluations();
+            case 2 -> RecordAttendance();
+            case 3 -> DisplayMarksSheet();
             case 4 -> EnterMarks();
             case 5 -> EnterGrades();
             default -> {
@@ -44,17 +72,18 @@ public class TeacherMenu extends Menu {
         }
     }
 
-    boolean Authenticate(String username, String password) {
+    boolean Authenticate() {
         try {
             String uname = "";
             String pass = "";
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM Teacher WHERE Teacher_username = '" + username + "'");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Teacher WHERE Teacher_username = '"
+                    + teacherUsername + "'");
             while (rs.next()) {
                 uname = rs.getString("Officer_username");
                 pass = rs.getString("Officer_Password");
             }
-            if (uname.equals(username) && pass.equals(password)) {
+            if (uname.equals(teacherUsername) && pass.equals(teacherPassword)) {
                 return true;
             }
 
@@ -65,15 +94,15 @@ public class TeacherMenu extends Menu {
         return false;
     }
 
-    private void SetEvaluations(Scanner input) {
+    private void SetEvaluations() {
         System.out.println("Enter Evaluation Name : ");
-        String Name = input.next();
+        String Name = InputReader.getInstance().GetString();
         System.out.println("Enter Type of Evaluation : ");
-        String type = input.next();
+        String type = InputReader.getInstance().GetString();
         System.out.println("Enter Weightage of Evaluation : ");
-        int weight = input.nextInt();
+        int weight = InputReader.getInstance().GetInt();
         System.out.println("Enter Total Marks of Evaluation : ");
-        int Total_Marks = input.nextInt();
+        int Total_Marks = InputReader.getInstance().GetInt();
         Evaluation E = new Evaluation(Name, type, weight, Total_Marks);
 
         System.out.println("Choose Section for Evaluation\n");
@@ -81,7 +110,7 @@ public class TeacherMenu extends Menu {
         for (int i = 0; i < teacher.getSections().size(); i++) {
             System.out.println(teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
                     ")\nIf you want to select this section enter 1 else enter 0");
-            inp = input.nextInt();
+            inp = InputReader.getInstance().GetInt();
             if (inp == 1) {
                 teacher.getSections().get(i).insertEvaluation(E);
             }
@@ -89,23 +118,22 @@ public class TeacherMenu extends Menu {
 
     }
 
-    private void RecordAttendance(Scanner input) {
+    private void RecordAttendance() {
         String date;
         char present;
-        System.out.println("Enter Date");
-        date = input.next();
+        date = InputReader.getInstance().GetString("Enter Date: ");
         int inp = 0;
         for (int i = 0; i < teacher.getSections().size() && inp == 0; i++) {
-            System.out.println(teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
-                    ")\nIf you want to select this section enter 1 else enter 0");
-            inp = input.nextInt();
+            String sectionSelectionTxt = teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
+                    ")\nIf you want to select this section enter 1 else enter 0";
+            inp = InputReader.getInstance().GetInt(sectionSelectionTxt);
             if (inp == 1) {
                 System.out.println("For present press p, for absent press a after students name");
                 for (int j = 0; j < teacher.getSections().get(i).getStudents().size(); j++) {
                     for (int x = 0; x < teacher.getSections().get(i).getStudents().get(j).getCourses().size(); x++) {
                         if (teacher.getSections().get(i).getStudents().get(j).getCourses().get(x).getSection() == teacher.getSections().get(i)) {
-                            System.out.println(teacher.getSections().get(i).getStudents().get(j).getName() + " : (p/a) : ");
-                            present = input.next().charAt(0);
+                            String string = teacher.getSections().get(i).getStudents().get(j).getName() + " : (p/a) : ";
+                            present = InputReader.getInstance().GetChar(string, 0);
                             teacher.getSections().get(i).getStudents().get(j).getCourses().get(x).Add_Attendance(date, present);
                         }
                     }
@@ -114,12 +142,12 @@ public class TeacherMenu extends Menu {
         }
     }
 
-    private void DisplayMarksSheet(Scanner input) {
+    private void DisplayMarksSheet() {
         int inp = 0;
         for (int i = 0; i < teacher.getSections().size() && inp == 0; i++) {
             System.out.println(teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
                     ")\nIf you want to select this section enter 1 else enter 0");
-            inp = input.nextInt();
+            inp = InputReader.getInstance().GetInt();
             if (inp == 1) {
                 for (int j = 0; j < teacher.getSections().get(i).getStudents().size(); j++) {
                     for (int x = 0; x < teacher.getSections().get(i).getStudents().get(j).getCourses().size(); x++) {
@@ -143,7 +171,7 @@ public class TeacherMenu extends Menu {
         for (int i = 0; i < teacher.getSections().size() && inp == 0; i++) {
             System.out.println(teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
                     ")\nIf you want to select this section enter 1 else enter 0");
-            inp = input.nextInt();
+            inp = InputReader.getInstance().GetInt();
             if (inp == 1) {
                 for (int j = 0; j < teacher.getSections().get(i).getStudents().size(); j++) {
                     for (int x = 0; x < teacher.getSections().get(i).getStudents().get(j).getCourses().size(); x++) {
@@ -153,7 +181,7 @@ public class TeacherMenu extends Menu {
                             for (int y = 0; y < Eva.size(); y++) {
                                 System.out.println("No#" + (y + 1) + " Name : " + Eva.get(y).getName() + " Type : " + Eva.get(y).getType_of_Evaluation()
                                         + " Total Marks : " + Eva.get(y).getTotal_Marks() + "Enter Marks : ");
-                                marks = input.nextFloat();
+                                marks = InputReader.getInstance().GetFloat();
                                 Eva.get(y).setMarks_Obtained(marks);
                             }
                         }
@@ -169,13 +197,13 @@ public class TeacherMenu extends Menu {
         for (int i = 0; i < teacher.getSections().size() && inp == 0; i++) {
             System.out.println(teacher.getSections().get(i).getCourse() + "(" + teacher.getSections().get(i).getName() +
                     ")\nIf you want to select this section enter 1 else enter 0");
-            inp = input.nextInt();
+            inp = InputReader.getInstance().GetInt();
             if (inp == 1) {
                 for (int j = 0; j < teacher.getSections().get(i).getStudents().size(); j++) {
                     for (int x = 0; x < teacher.getSections().get(i).getStudents().get(j).getCourses().size(); x++) {
                         if (teacher.getSections().get(i).getStudents().get(j).getCourses().get(x).getSection() == teacher.getSections().get(i)) {
                             System.out.println("\nName : " + teacher.getSections().get(i).getStudents().get(j).getName() + "Enter Grade : ");
-                            CreditEarned = input.nextFloat();
+                            CreditEarned = InputReader.getInstance().GetFloat();
                             teacher.getSections().get(i).getStudents().get(j).getCourses().get(x).setCreditEarned(CreditEarned);
                         }
                     }

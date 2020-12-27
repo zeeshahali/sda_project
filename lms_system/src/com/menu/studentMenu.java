@@ -1,31 +1,64 @@
 package com.menu;
 
+import com.Utility.InputReader;
+import com.lms.Course;
 import com.lms.Registered;
 import com.lms.Student;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class StudentMenu extends Menu {
     Student student;
-    public StudentMenu(Scanner _input, Connection _con) {
-        input = _input;
+    private String studentUsername;
+    private String StudentPassword;
+
+    public StudentMenu(Connection _con) {
         con = _con;
-    }
-    void ShowMenu(){
-        String menu = "1. Register to a course.\n2. Drop a course.\n3. Subscribe to a section.\n" +
-                "4. View your attendance.\n5. View your transcript.\n0. To go back a menu.\nEnter your choice: ";
-        System.out.println(menu);
-        int choice = input.nextInt();
-
-        HandleChoice(choice);
+        studentUsername = null;
+        StudentPassword = null;
     }
 
-    private void HandleChoice(int choice) {
+    public void ShowMenu(){
+        if(CanTakeInput()) {
+            TakeInput();
+        }
+
+        boolean result = Authenticate();
+        if (result) {
+            String menu = "1. Register to a course.\n2. Drop a course.\n3. Subscribe to a section.\n" +
+                    "4. View your attendance.\n5. View your transcript.\n0. To go back a menu.\nEnter your choice: ";
+            System.out.println(menu);
+            int choice = InputReader.getInstance().GetInt();
+
+            HandleChoice(choice);
+        }
+        else{
+            System.out.println("username or password incorrect!");
+            studentUsername = null;
+            ShowMenu();
+        }
+    }
+
+    private boolean CanTakeInput() {
+        return studentUsername == null || StudentPassword == null;
+    }
+
+    private void TakeInput() {
+        System.out.println("Enter username: ");
+        studentUsername = InputReader.getInstance().GetString();
+        System.out.println("Enter password: ");
+        StudentPassword = InputReader.getInstance().GetString();
+    }
+
+    void HandleChoice(int choice) {
         switch (choice) {
             case 0 -> {
-                MainMenu mainMenu = new MainMenu(input, con);
+                MainMenu mainMenu = new MainMenu(con);
                 mainMenu.ShowMenu();
             }
             case 1 -> RegisterCourse();
@@ -40,6 +73,27 @@ public class StudentMenu extends Menu {
         }
     }
 
+    boolean Authenticate(){
+        try {
+            String uname = "";
+            String pass = "";
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Academic_Officer WHERE Officer_username = '" + studentUsername + "'");
+            while (rs.next()) {
+                uname = rs.getString("Officer_username");
+                pass = rs.getString("Officer_Password");
+            }
+            if(uname.equals(studentUsername) && pass.equals(StudentPassword)){
+                return true;
+            }
+
+        } catch (SQLException e) {
+
+            System.out.println("Could not connect to the database " + e.getMessage());
+        }
+        return false;
+    }
+
     private void RegisterCourse(){
         System.out.println("registerCourse function called");
     }
@@ -49,7 +103,9 @@ public class StudentMenu extends Menu {
     }
 
     private void SubscribeToSection(){
-        System.out.println();
+        System.out.println("Select the Course you want to subscribe: ");
+        ArrayList<Course> courses = Course.ShowCoursesInSem(con, student.getBatch());
+
     }
 
     void ViewAttendance(){
@@ -57,7 +113,7 @@ public class StudentMenu extends Menu {
         for (Registered course : courses) {
             if (course.getBatch() == student.getBatch()) {
                 System.out.println(course.getSection().getCourse().getName() + " : "
-                        + course.getCalculated_Attendence() + "%\n");
+                        + course.getCalculated_Attendance() + "%\n");
             }
         }
 

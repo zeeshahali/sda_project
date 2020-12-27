@@ -3,15 +3,15 @@ package com.menu;
 import java.sql.Connection;
 import java.util.Scanner;
 
-public class Menu {
-    Scanner input;
+abstract class Menu {
     Connection con;
 
     public Menu(){}
-    public Menu(Scanner _input, Connection _con) {
-        this.input = _input;
+    public Menu(Connection _con) {
         this.con = _con;
     }
-    void ShowMenu(){}
-    boolean Authenticate(String username, String password){ return true;}
+    public abstract void ShowMenu();
+    abstract boolean Authenticate();
+    abstract void HandleChoice(int choice);
+
 }
