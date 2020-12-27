@@ -62,6 +62,4 @@ public class Registered{
         this.batch = batch;
     }
 
-
-
 }

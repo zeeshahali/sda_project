@@ -1,10 +1,9 @@
 package com.menu;
 
 import com.Utility.InputReader;
+import com.Utility.Main;
 import com.Utility.Utils;
-import com.lms.Course;
-import com.lms.Registered;
-import com.lms.Student;
+import com.lms.*;
 import jdk.jshell.execution.Util;
 
 import java.sql.Connection;
@@ -25,9 +24,21 @@ public class StudentMenu extends Menu {
         StudentPassword = null;
     }
 
-    Student StudentData(Connection connection){
-
-        return student;
+    void StudentData(Connection connection){
+        try{
+            Statement statement = con.createStatement();
+            ResultSet resultSet =  statement.executeQuery("SELECT * FROM Student WHERE Student_username = '" +studentUsername+ "'");
+            while (resultSet.next()){
+                String name = resultSet.getString("Student_Name");
+                String rollNo = resultSet.getString("Student_RollNo");
+                int batch = resultSet.getInt("Student_Batch");
+                float sgpa = resultSet.getFloat("SGPA");
+                float cgpa = resultSet.getFloat("CGPA");
+                student = new Student(studentUsername, studentUsername, name, rollNo, batch, sgpa, cgpa);
+            }
+        } catch (SQLException e){
+            System.out.println("Error getting admin data");
+        }
     }
 
     public void ShowMenu(){
@@ -37,7 +48,7 @@ public class StudentMenu extends Menu {
         boolean result = Authenticate();
         if (result) {
             Utils.PrintDivider();
-            student = StudentData(con);
+            StudentData(con);
             String menu = "1. Register to a course.\n2. Drop a course.\n3. Subscribe to a section.\n" +
                     "4. View your attendance.\n5. View your transcript.\n0. To go back a menu.\nEnter your choice: ";
             System.out.println(menu);
@@ -104,17 +115,33 @@ public class StudentMenu extends Menu {
     }
 
     private void RegisterCourse(){
-        System.out.println("registerCourse function called");
+        ArrayList<Course> semCourse = Course.ShowCoursesInSem(con, student.getBatch());
+        for (int i = 0; i < semCourse.size(); i++) {
+            System.out.println(i + "- ");
+            semCourse.get(i).PrintCourse();
+        }
+        int select = InputReader.getInstance().GetInt("Enter your selection");
+        student.RegisterCourse(select);
+        ShowMenu();
     }
 
+
+
     private void DropCourse(){
-        System.out.println("dropCourse function called");
+        ArrayList<Section> registeredSections =  student.RegisteredSections();
+        for (Section section : registeredSections) section.PrintSection();
+        String sect = InputReader.getInstance().GetString("Enter Section Code");
+        student.DropSection(sect);
+        ShowMenu();
     }
 
     private void SubscribeToSection(){
         System.out.println("Select the Course you want to subscribe: ");
         ArrayList<Course> courses = Course.ShowCoursesInSem(con, student.getBatch());
-
+        for (Course course: courses) course.PrintCourse();
+        String course = InputReader.getInstance().GetString("Enter the course code for the course you want to subscribe");
+        System.out.println(course+ " Subscribed successfully");
+        ShowMenu();
     }
 
     void ViewAttendance(){
@@ -125,7 +152,7 @@ public class StudentMenu extends Menu {
                         + course.getCalculated_Attendance() + "%\n");
             }
         }
-
+        ShowMenu();
     }
 
     void ViewTranscript(){
@@ -141,6 +168,7 @@ public class StudentMenu extends Menu {
             }
             System.out.println("\n");
         }
+        ShowMenu();
     }
 
 }

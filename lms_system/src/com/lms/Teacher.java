@@ -20,7 +20,7 @@ public class Teacher extends User{
     }
 
     public void PrintTeacher(){
-        System.out.println("Teacher: "+this.name);
+        System.out.println("Username: "+username+"\nTeacher: "+this.name);
     }
 
     public void add_Section(Section s){

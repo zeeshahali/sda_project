@@ -145,7 +145,6 @@ public class Course {
                 String preReq = resultSet.getString("Course_PreReq");
                 int credits = resultSet.getInt("Course_CH");
                 course = new Course(code, name, semester, preReq, credits);
-
             }
         }catch (SQLException e){
             System.out.println("No Course Exists " + e.getMessage());

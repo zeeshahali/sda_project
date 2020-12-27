@@ -1,4 +1,6 @@
 package com.lms;
+import com.Utility.Utils;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +18,15 @@ public class Section{
     ArrayList<Evaluation> Evaluations;
     ArrayList<Student> Waiting_List = new ArrayList<Student>();
     ArrayList<Student> students = new ArrayList<Student>();
+
+    public void PrintSection(){
+        System.out.println("Section code: "+this.code+ "\nSection Name: "+this.name+
+                "\nTotal Seats: "+this.Total_Number_Of_Seats+ "\nSeats Available "+this.Number_Of_Seats_Available+
+                "\nCourse: "+this.course.getName()+ "\nTeacher: "+teacher.getName());
+        Utils.PrintDivider();
+    }
+
+    public Section(){}
 
     public Section(String code, String name, int Total_Number_Of_Seats, Course course, Teacher teacher){
             this.code = code;
@@ -177,5 +188,27 @@ public class Section{
                     System.out.println(e.getMessage());
             }
             return sections;
+    }
+
+    public static Section GetSectionFromCode(Connection connection, String sectCode){
+        Section section = new Section();
+        try{
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM SECTION WHERE Section_Code = '"+sectCode+"'");
+            while(resultSet.next()){
+                String code = resultSet.getString("Section_Code");
+                String name = resultSet.getString("Section_Name");
+                int totalSeats = resultSet.getInt("Section_Total_Number_Of_Seats");
+                int totalAvail = resultSet.getInt("Section_Number_Of_Seats_Available");
+                String teacherUser = resultSet.getString("Teacher_username");
+                String courseCode = resultSet.getString("Course_Code");
+                Teacher teacher = Teacher.SectionTeacher(connection, teacherUser);
+                Course course = Course.SectionCourse(connection, courseCode);
+                section = new Section(code, name, totalSeats, course, teacher);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return section;
     }
 }

@@ -1,6 +1,7 @@
 package com.Utility;
 
 import com.lms.Attendance;
+import com.lms.Registration;
 import com.lms.Section;
 import com.menu.MainMenu;
 

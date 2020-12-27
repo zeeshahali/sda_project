@@ -2,10 +2,7 @@ package com.menu;
 
 import com.Utility.InputReader;
 import com.Utility.Utils;
-import com.lms.Admin;
-import com.lms.Course;
-import com.lms.Section;
-import com.lms.Teacher;
+import com.lms.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -149,6 +146,8 @@ public class AdminMenu extends Menu {
         int CH = InputReader.getInstance().GetInt();
         Course c = new Course(Code,Name,offeredInSemester, PreReq,CH);
         AddCourseToDB(c);
+        System.out.println("Course Added Successfully");
+        ShowMenu();
     }
 
     void AddSection(){
@@ -166,6 +165,8 @@ public class AdminMenu extends Menu {
         teachers.get(teacher).add_Section(section);
         courses.get(course).add_section(section);
         AddSectionToDB(section);
+        System.out.println("Section Added Successfully");
+        ShowMenu();
     }
 
     private void PrintAvailableCourses(ArrayList<Course> courses) {
@@ -176,16 +177,36 @@ public class AdminMenu extends Menu {
     }
 
     void openRegistration(){
-        System.out.println("Enter the Semester: ");
-        int semester = InputReader.getInstance().GetInt();
-        int section = InputReader.getInstance().GetInt("Enter the Section you want to open registration for: ");
+        ArrayList<Registration> registrations = getRegistrations();
+        int id = InputReader.getInstance().GetInt("Enter the registration id you want to open") - 1;
+        registrations.get(id).setActive('Y');
+        System.out.println("Registration Opened Successfully");
+        ShowMenu();
+    }
+
+    private ArrayList<Registration> getRegistrations() {
+        Utils.PrintDivider();
+        ArrayList<Registration> registrations = Registration.AllRegistrations(con);
+        for (Registration registration : registrations) {
+            registration.PrintRegistration();
+        }
+        return registrations;
     }
 
     void closeRegistration(){
-        System.out.println("closeRegistration function called");
+        ArrayList<Registration> registrations = getRegistrations();
+        int id = InputReader.getInstance().GetInt("Enter the registration id you want to close") - 1;
+        registrations.get(id).setActive('N');
+        System.out.println("Registration Closed Successfully");
+        ShowMenu();
     }
 
     void setDeadline(){
-        System.out.println("setDeadline function called");
+        ArrayList<Registration> registrations = getRegistrations();
+        int id = InputReader.getInstance().GetInt("Enter the registration id you want to close") - 1;
+        String deadline = InputReader.getInstance().GetString("Enter Deadline");
+        registrations.get(id).setDeadline(deadline);
+        System.out.println("Registration Deadline set Successfully");
+        ShowMenu();
     }
 }
